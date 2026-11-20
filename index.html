@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMARTBIZ - Manage • Record • Grow</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js for Dashboard Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        maroon: {
+                            50: '#fdf2f4',
+                            100: '#fce7eb',
+                            200: '#f9d0d9',
+                            300: '#f4a8b8',
+                            400: '#ec7690',
+                            500: '#df486b',
+                            600: '#c82850',
+                            700: '#a81c40',
+                            800: '#800020', // Primary Maroon
+                            900: '#5c0017', // Deep Maroon
+                            950: '#3b000d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar & Print Styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #800020;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white !important;
+            }
+            #main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-maroon-800 selection:text-white">
+
+    <!-- ==================== TOAST NOTIFICATION ==================== -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==================== AUTHENTICATION SCREEN (LOGIN / SIGN UP) ==================== -->
+    <div id="auth-screen" class="min-h-screen relative overflow-hidden flex flex-col justify-center items-center p-4 bg-gradient-to-br from-maroon-50 via-white to-maroon-100">
+        <!-- Decorative SVG Waves & Growth Chart Background matching screenshot -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 900" preserveAspectRatio="none">
+            <!-- Top Left Maroon Wave -->
+            <path d="M0,0 L520,0 C340,80 180,120 0,165 Z" fill="#6b001a" />
+            <path d="M0,165 C180,120 340,80 520,0 L590,0 C390,95 200,145 0,200 Z" fill="#800020" opacity="0.35" />
+            
+            <!-- Subtle Diagonal Sweeps -->
+            <path d="M0,320 Q720,180 1440,40 L1440,380 Q720,460 0,560 Z" fill="#800020" opacity="0.04" />
+            <path d="M0,620 Q720,500 1440,260 L1440,720 Q720,820 0,880 Z" fill="#800020" opacity="0.05" />
+
+            <!-- Decorative Rising Bar Chart & Arrow on Bottom Right -->
+            <g opacity="0.10" fill="#800020">
+                <rect x="1080" y="640" width="42" height="160" rx="6" />
+                <rect x="1145" y="570" width="42" height="230" rx="6" />
+                <rect x="1210" y="490" width="42" height="310" rx="6" />
+                <rect x="1275" y="400" width="42" height="400" rx="6" />
+                <rect x="1340" y="300" width="42" height="500" rx="6" />
+                <!-- Upward Growth Arrow -->
+                <path d="M1030,630 Q1200,480 1350,235 L1320,230 L1385,195 L1390,265 L1365,250 Q1215,500 1030,630 Z" />
+            </g>
+
+            <!-- Bottom Right Maroon Wave -->
+            <path d="M880,900 C1080,810 1260,760 1440,720 L1440,900 Z" fill="#6b001a" />
+            <path d="M970,900 C1140,825 1290,780 1440,745" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.6" />
+        </svg>
+
+        <!-- Top Right Language Switcher Pill -->
+        <div class="absolute top-6 right-6 z-20 bg-white/95 backdrop-blur-sm p-1.5 rounded-2xl shadow-md border border-maroon-100 flex items-center gap-1">
+            <button onclick="setLanguage('ms')" id="auth-lang-ms" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-maroon-800 text-white shadow-sm">BM</button>
+            <button onclick="setLanguage('en')" id="auth-lang-en" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-maroon-800">EN</button>
+        </div>
+
+        <!-- Centered White Auth Card -->
+        <div class="relative z-10 w-full max-w-md bg-white rounded-3xl shadow-2xl shadow-maroon-950/10 border border-slate-100 p-7 sm:p-9 transition-all">
+            <!-- SMARTBIZ Custom SVG Logo (Exact match to kkkk.jpeg) -->
+            <div class="flex flex-col items-center mb-6">
+                <svg class="w-36 h-24 mb-1" viewBox="0 0 220 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="sMainGrad" x1="30" y1="10" x2="170" y2="120" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#9e1434" />
+                            <stop offset="50%" stop-color="#7a001c" />
+                            <stop offset="100%" stop-color="#47000f" />
+                        </linearGradient>
+                        <linearGradient id="sFoldGrad" x1="50" y1="45" x2="155" y2="105" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#42000e" />
+                            <stop offset="60%" stop-color="#75001b" />
+                            <stop offset="100%" stop-color="#9c1636" />
+                        </linearGradient>
+                        <linearGradient id="arrowGrad" x1="40" y1="115" x2="185" y2="30" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#6b0018" />
+                            <stop offset="65%" stop-color="#9e1434" />
+                            <stop offset="100%" stop-color="#b5193d" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Upper Ribbon of S -->
+                    <path d="M166 14H106C76 14 58 29 58 48C58 65 72 74 96 78L130 62C102 58 88 53 88 43C88 34 98 29 114 29H154L166 14Z" fill="url(#sMainGrad)" />
+                    <!-- Lower Curve of S -->
+                    <path d="M96 78C124 83 136 89 136 100C136 111 122 118 98 118C84 118 71 116 60 113C74 123 94 128 116 128C149 128 168 112 168 91C168 73 153 64 130 62L96 78Z" fill="url(#sFoldGrad)" />
+                    <!-- 3 Ascending Bar Chart Pillars Inside Lower S -->
+                    <rect x="85" y="84" width="11" height="17" rx="2.5" fill="url(#sMainGrad)" />
+                    <rect x="100" y="75" width="11" height="23" rx="2.5" fill="url(#sMainGrad)" />
+                    <rect x="115" y="65" width="11" height="29" rx="2.5" fill="url(#sMainGrad)" />
+                    <!-- White Cutout Cushion Behind Swoosh Arrow -->
+                    <path d="M40 94C38 116 74 127 122 103C146 91 165 73 178 52" stroke="#ffffff" stroke-width="8" stroke-linecap="round" fill="none" />
+                    <!-- Sweeping Upward Growth Swoosh & Arrowhead -->
+                    <path d="M41 90C35 113 69 125 118 101C142 89 160 72 173 53L162 47L189 35L187 64L177 58C162 79 142 98 115 111C67 134 32 117 41 90Z" fill="url(#arrowGrad)" />
+                </svg>
+                <h1 class="font-display font-extrabold text-3xl tracking-wider text-maroon-900 -mt-1">SMARTBIZ</h1>
+                <div class="flex items-center gap-2.5 mt-1">
+                    <span class="h-[1.5px] w-7 bg-maroon-700/70"></span>
+                    <p class="text-xs font-semibold tracking-wider text-maroon-800">Manage • Record • Grow</p>
+                    <span class="h-[1.5px] w-7 bg-maroon-700/70"></span>
+                </div>
+            </div>
+
+            <!-- Tab Switcher: Log Masuk / Daftar Akaun -->
+            <div class="grid grid-cols-2 bg-slate-100 p-1.5 rounded-2xl mb-6">
+                <button type="button" onclick="switchAuthTab('login')" id="tab-login" class="py-2.5 text-sm font-bold rounded-xl bg-white text-maroon-800 shadow-sm transition-all" data-i18n="auth_tab_login">Log Masuk</button>
+                <button type="button" onclick="switchAuthTab('signup')" id="tab-signup" class="py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition-all" data-i18n="auth_tab_signup">Daftar Akaun</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900" data-i18n="auth_welcome_title">Selamat Kembali!</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="auth_welcome_sub">Sila masukkan maklumat akaun anda untuk meneruskan.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" data-i18n="auth_email_label">EMEL ATAU NAMA PENGGUNA</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+                        <input type="text" id="login-email" required class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:border-maroon-800 focus:ring-2 focus:ring-maroon-800/15 transition-all" placeholder="nama@syarikat.my">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" data-i18n="auth_password_label">KATA LALUAN</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </span>
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:border-maroon-800 focus:ring-2 focus:ring-maroon-800/15 transition-all" placeholder="••••••••">
+                        <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-maroon-800">
+                            <i id="login-eye" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="login-error" class="hidden text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl p-2.5"></div>
+
+                <button type="submit" class="w-full py-3.5 px-4 bg-maroon-800 hover:bg-maroon-900 active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-lg shadow-maroon-800/25 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    <span data-i18n="auth_btn_login">Log Masuk ke Sistem</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+
+                <p class="text-center text-xs text-slate-500 pt-1">
+                    <span data-i18n="auth_no_account_hint">Pengguna baharu?</span>
+                    <button type="button" onclick="switchAuthTab('signup')" class="font-bold text-maroon-800 hover:underline ml-1 cursor-pointer" data-i18n="auth_tab_signup">Daftar Akaun</button>
+                </p>
+            </form>
+
+            <!-- SIGN UP FORM -->
+            <form id="signup-form" onsubmit="handleSignup(event)" class="space-y-4 hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900" data-i18n="auth_signup_title">Cipta Akaun Baru</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="auth_signup_sub">Daftar untuk mula menguruskan rekod kewangan perniagaan anda.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" data-i18n="auth_fullname_label">NAMA PENUH / SYARIKAT</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-regular fa-building"></i>
+                        </span>
+                        <input type="text" id="signup-name" required class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:border-maroon-800 focus:ring-2 focus:ring-maroon-800/15 transition-all" placeholder="Ahmad Bin Abdullah">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" data-i18n="auth_email_label">EMEL ATAU NAMA PENGGUNA</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-regular fa-envelope"></i>
+                        </span>
+                        <input type="email" id="signup-email" required class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:border-maroon-800 focus:ring-2 focus:ring-maroon-800/15 transition-all" placeholder="nama@syarikat.my">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" data-i18n="auth_password_label">KATA LALUAN</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </span>
+                        <input type="password" id="signup-password" required minlength="4" class="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:border-maroon-800 focus:ring-2 focus:ring-maroon-800/15 transition-all" placeholder="Minimum 4 aksara">
+                        <button type="button" onclick="togglePasswordVisibility('signup-password', 'signup-eye')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-maroon-800">
+                            <i id="signup-eye" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 px-4 bg-maroon-800 hover:bg-maroon-900 active:scale-[0.99] text-white font-bold text-sm rounded-xl shadow-lg shadow-maroon-800/25 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    <span data-i18n="auth_btn_signup">Daftar Akaun Sekarang</span>
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APPLICATION SHELL ==================== -->
+    <div id="app-shell" class="hidden min-h-screen flex bg-slate-50">
+
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+
+        <!-- SIDEBAR (MAROON THEME) -->
+        <aside id="sidebar" class="no-print fixed lg:static inset-y-0 left-0 z-40 w-68 bg-gradient-to-b from-maroon-900 via-maroon-800 to-maroon-950 text-white flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-2xl">
+            <!-- Brand Header -->
+            <div class="p-5 flex items-center justify-between border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shadow-md shrink-0 p-1">
+                        <svg class="w-full h-full" viewBox="0 0 220 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M166 14H106C76 14 58 29 58 48C58 65 72 74 96 78L130 62C102 58 88 53 88 43C88 34 98 29 114 29H154L166 14Z" fill="#800020" />
+                            <path d="M96 78C124 83 136 89 136 100C136 111 122 118 98 118C84 118 71 116 60 113C74 123 94 128 116 128C149 128 168 112 168 91C168 73 153 64 130 62L96 78Z" fill="#540014" />
+                            <rect x="85" y="84" width="11" height="17" rx="2.5" fill="#800020" />
+                            <rect x="100" y="75" width="11" height="23" rx="2.5" fill="#800020" />
+                            <rect x="115" y="65" width="11" height="29" rx="2.5" fill="#800020" />
+                            <path d="M40 94C38 116 74 127 122 103C146 91 165 73 178 52" stroke="#ffffff" stroke-width="8" stroke-linecap="round" fill="none" />
+                            <path d="M41 90C35 113 69 125 118 101C142 89 160 72 173 53L162 47L189 35L187 64L177 58C162 79 142 98 115 111C67 134 32 117 41 90Z" fill="#a81c40" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-display font-extrabold text-lg tracking-wide block leading-tight">SMARTBIZ</span>
+                        <span class="text-[10px] text-maroon-200 tracking-wider uppercase block">Manage • Record • Grow</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden text-white/70 hover:text-white p-1.5">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 overflow-y-auto px-3.5 py-4 space-y-1">
+                <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-maroon-300/80 mb-2" data-i18n="nav_main_menu">MENU UTAMA</p>
+                
+                <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-white text-maroon-900 shadow-md">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span data-i18n="nav_dashboard">Dashboard</span>
+                </button>
+
+                <button onclick="navigateTo('products')" id="nav-products" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-box-open w-5 text-center"></i>
+                    <span data-i18n="nav_products">Produk</span>
+                </button>
+
+                <button onclick="navigateTo('purchases')" id="nav-purchases" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-cart-shopping w-5 text-center"></i>
+                    <span data-i18n="nav_purchases">Pembelian</span>
+                </button>
+
+                <button onclick="navigateTo('sales')" id="nav-sales" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-cash-register w-5 text-center"></i>
+                    <span data-i18n="nav_sales">Jualan</span>
+                </button>
+
+                <button onclick="navigateTo('incomes')" id="nav-incomes" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-hand-holding-dollar w-5 text-center"></i>
+                    <span data-i18n="nav_incomes">Pendapatan</span>
+                </button>
+
+                <button onclick="navigateTo('expenses')" id="nav-expenses" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-receipt w-5 text-center"></i>
+                    <span data-i18n="nav_expenses">Perbelanjaan</span>
+                </button>
+
+                <div class="pt-3 pb-1">
+                    <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-maroon-300/80 mb-2" data-i18n="nav_reports_settings">LAPORAN & TETAPAN</p>
+                </div>
+
+                <button onclick="navigateTo('pnl')" id="nav-pnl" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-scale-balanced w-5 text-center"></i>
+                    <span data-i18n="nav_pnl">Untung & Rugi</span>
+                </button>
+
+                <button onclick="navigateTo('company')" id="nav-company" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-building-shield w-5 text-center"></i>
+                    <span data-i18n="nav_company">Maklumat Syarikat</span>
+                </button>
+            </nav>
+
+            <!-- User & Logout Footer inside Sidebar -->
+            <div class="p-4 border-t border-white/10 bg-maroon-950/50 space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-maroon-700 border border-maroon-400/30 flex items-center justify-center font-bold text-sm" id="sidebar-user-avatar">A</div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-white truncate" id="sidebar-user-name">Admin SmartBiz</p>
+                        <p class="text-[11px] text-maroon-300 truncate" id="sidebar-user-email">admin@smartbiz.my</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="w-full py-2.5 px-3 bg-white/10 hover:bg-red-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span data-i18n="btn_logout">Log Keluar</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div id="main-content" class="flex-1 flex flex-col min-w-0">
+            <!-- TOP BAR -->
+            <header class="no-print sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-7 py-3.5 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <div>
+                        <h2 id="topbar-title" class="text-lg sm:text-xl font-display font-bold text-slate-900">Dashboard</h2>
+                        <p id="topbar-company-badge" class="text-xs text-maroon-800 font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-store text-[10px]"></i>
+                            <span id="header-company-name">SMARTBIZ ENTERPRISE</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <!-- Language Toggle Inside System -->
+                    <div class="bg-slate-100 p-1 rounded-xl border border-slate-200 flex items-center">
+                        <button onclick="setLanguage('ms')" id="app-lang-ms" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-maroon-800 text-white shadow-xs">BM</button>
+                        <button onclick="setLanguage('en')" id="app-lang-en" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-maroon-800">EN</button>
+                    </div>
+
+                    <!-- Quick Logout Button on Topbar for mobile/easy access -->
+                    <button onclick="handleLogout()" title="Log Keluar / Log Out" class="p-2.5 rounded-xl bg-maroon-50 hover:bg-maroon-800 text-maroon-800 hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-power-off"></i>
+                        <span class="hidden sm:inline" data-i18n="btn_logout">Log Keluar</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- DYNAMIC PAGE SECTIONS -->
+            <main class="flex-1 p-4 sm:p-7 max-w-7xl w-full mx-auto space-y-6">
+
+                <!-- ==================== 1. DASHBOARD SECTION ==================== -->
+                <section id="section-dashboard" class="space-y-6">
+                    <!-- KPI Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+                        <!-- Total Sales -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="kpi_sales">Jumlah Jualan</span>
+                                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-arrow-trend-up"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl font-display font-extrabold text-slate-900" id="dash-total-sales">RM 0.00</p>
+                            <p class="text-[11px] text-emerald-600 font-medium mt-1" id="dash-sales-count">0 transaksi</p>
+                        </div>
+
+                        <!-- Total Other Incomes -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="kpi_incomes">Pendapatan Lain</span>
+                                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-coins"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl font-display font-extrabold text-slate-900" id="dash-total-incomes">RM 0.00</p>
+                            <p class="text-[11px] text-blue-600 font-medium mt-1" id="dash-incomes-count">0 rekod</p>
+                        </div>
+
+                        <!-- Total Purchases -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="kpi_purchases">Jumlah Pembelian</span>
+                                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-cart-flatbed"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl font-display font-extrabold text-slate-900" id="dash-total-purchases">RM 0.00</p>
+                            <p class="text-[11px] text-amber-600 font-medium mt-1" id="dash-purchases-count">0 rekod</p>
+                        </div>
+
+                        <!-- Total Expenses -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="kpi_expenses">Perbelanjaan</span>
+                                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl font-display font-extrabold text-slate-900" id="dash-total-expenses">RM 0.00</p>
+                            <p class="text-[11px] text-rose-600 font-medium mt-1" id="dash-expenses-count">0 rekod</p>
+                        </div>
+
+                        <!-- Net Profit / Loss (Maroon Accent Card) -->
+                        <div class="bg-gradient-to-br from-maroon-800 to-maroon-950 rounded-2xl p-5 text-white shadow-lg shadow-maroon-900/20 sm:col-span-2 xl:col-span-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-maroon-200" data-i18n="kpi_net_profit">Untung / Rugi Bersih</span>
+                                <div class="w-9 h-9 rounded-xl bg-white/15 text-white flex items-center justify-center">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl font-display font-extrabold" id="dash-net-profit">RM 0.00</p>
+                            <p class="text-[11px] text-maroon-200 font-medium mt-1" id="dash-profit-status">Status Kewangan</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts & Payment Method Breakdown -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-900" data-i18n="chart_overview_title">Ringkasan Aliran Kewangan (RM)</h3>
+                                    <p class="text-xs text-slate-500" data-i18n="chart_overview_sub">Perbandingan Jualan, Pendapatan, Pembelian & Perbelanjaan</p>
+                                </div>
+                                <!-- Period Filter for Dashboard Bar Chart -->
+                                <div class="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+                                    <button type="button" onclick="setDashChartPeriod('all')" id="dash-period-all" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-maroon-800 text-white shadow-xs cursor-pointer" data-i18n="period_all">Keseluruhan</button>
+                                    <button type="button" onclick="setDashChartPeriod('month')" id="dash-period-month" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-maroon-800 cursor-pointer" data-i18n="period_month">Bulan Ini</button>
+                                    <button type="button" onclick="setDashChartPeriod('6m')" id="dash-period-6m" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-maroon-800 cursor-pointer" data-i18n="period_6m">6 Bulan</button>
+                                </div>
+                            </div>
+                            <div class="h-72 w-full">
+                                <canvas id="financeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method Breakdown -->
+                        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-slate-900" data-i18n="payment_breakdown_title">Pecahan Kaedah Bayaran</h3>
+                                <p class="text-xs text-slate-500 mb-5" data-i18n="payment_breakdown_sub">Berdasarkan jumlah transaksi jualan & pendapatan</p>
+                                
+                                <div class="space-y-4" id="dash-payment-breakdown">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <span class="text-xs text-slate-500" data-i18n="total_products_label">Jumlah Produk Aktif</span>
+                                <span class="px-3 py-1 rounded-full bg-maroon-50 text-maroon-800 font-bold text-xs" id="dash-product-count">0 Produk</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions Table -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-slate-900" data-i18n="recent_tx_title">Transaksi Terkini</h3>
+                                <p class="text-xs text-slate-500" data-i18n="recent_tx_sub">Rekod aktiviti kewangan terbaharu merentas semua modul</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                                        <th class="py-3 px-4" data-i18n="col_date">Tarikh</th>
+                                        <th class="py-3 px-4" data-i18n="col_type">Jenis</th>
+                                        <th class="py-3 px-4" data-i18n="col_product">Produk / Perkara</th>
+                                        <th class="py-3 px-4 text-center" data-i18n="col_qty">Kuantiti</th>
+                                        <th class="py-3 px-4" data-i18n="col_payment">Bayaran</th>
+                                        <th class="py-3 px-4 text-right" data-i18n="col_total">Jumlah (RM)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dash-recent-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== 2. TRANSACTION / PRODUCT CRUD SECTION (DYNAMIC VIEW FOR PRODUCTS, PURCHASES, SALES, INCOMES, EXPENSES) ==================== -->
+                <section id="section-crud" class="hidden space-y-5">
+                    <!-- Action Header Bar -->
+                    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row gap-3 flex-1">
+                            <!-- Search Input -->
+                            <div class="relative flex-1 max-w-xs">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="crud-search" oninput="renderCrudTable()" class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-maroon-800 focus:bg-white transition-all" placeholder="Cari rekod...">
+                            </div>
+                            <!-- Payment Filter (hidden on Products) -->
+                            <select id="crud-filter-payment" onchange="renderCrudTable()" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-maroon-800">
+                                <option value="ALL" data-i18n="filter_all_payments">Semua Kaedah Bayaran</option>
+                                <option value="Cash">Tunai (Cash)</option>
+                                <option value="Online Banking">Perbankan Dalam Talian (Online)</option>
+                                <option value="E-Wallet">E-Wallet (TnG / DuitNow)</option>
+                                <option value="Card">Kad Kredit / Debit</option>
+                                <option value="Other">Lain-lain (Other)</option>
+                            </select>
+                        </div>
+
+                        <button onclick="openRecordModal()" class="px-5 py-2.5 bg-maroon-800 hover:bg-maroon-900 text-white font-bold text-sm rounded-xl shadow-md shadow-maroon-800/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0">
+                            <i class="fa-solid fa-plus"></i>
+                            <span id="crud-add-btn-label">Tambah Rekod</span>
+                        </button>
+                    </div>
+
+                    <!-- Summary Strip for Current Module -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-2xl p-4 border border-slate-200/80">
+                            <p class="text-[11px] font-bold uppercase text-slate-400" data-i18n="summary_total_records">Jumlah Rekod</p>
+                            <p class="text-lg font-extrabold text-slate-900 mt-0.5" id="crud-stat-count">0</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-4 border border-slate-200/80">
+                            <p class="text-[11px] font-bold uppercase text-slate-400" data-i18n="summary_total_qty">Jumlah Kuantiti</p>
+                            <p class="text-lg font-extrabold text-slate-900 mt-0.5" id="crud-stat-qty">0</p>
+                        </div>
+                        <div class="bg-maroon-50 rounded-2xl p-4 border border-maroon-200/60 col-span-2 sm:col-span-1">
+                            <p class="text-[11px] font-bold uppercase text-maroon-700" data-i18n="summary_total_value">Jumlah Keseluruhan</p>
+                            <p class="text-lg font-extrabold text-maroon-900 mt-0.5" id="crud-stat-total">RM 0.00</p>
+                        </div>
+                    </div>
+
+                    <!-- Data Table Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead id="crud-thead"></thead>
+                                <tbody id="crud-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                        <div id="crud-empty-state" class="hidden py-12 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                <i class="fa-regular fa-folder-open text-xl"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-600" data-i18n="empty_records">Tiada rekod ditemui.</p>
+                            <p class="text-xs text-slate-400 mt-1" data-i18n="empty_records_sub">Klik butang tambah di atas untuk memasukkan rekod baharu.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== 3. PROFIT & LOSS (UNTUNG & RUGI) SECTION ==================== -->
+                <section id="section-pnl" class="hidden space-y-6">
+                    <!-- Filter & Print Controls -->
+                    <div class="no-print bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1" data-i18n="pnl_from_date">Dari Tarikh</label>
+                                <input type="date" id="pnl-start-date" onchange="renderPnL()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-maroon-800">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1" data-i18n="pnl_to_date">Hingga Tarikh</label>
+                                <input type="date" id="pnl-end-date" onchange="renderPnL()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-maroon-800">
+                            </div>
+                            <button onclick="clearPnLFilter()" class="mt-4 px-3 py-2 text-xs font-semibold text-maroon-800 hover:bg-maroon-50 rounded-xl transition-all" data-i18n="pnl_all_dates">Semua Tarikh</button>
+                        </div>
+
+                        <button onclick="window.print()" class="px-4 py-2.5 bg-maroon-800 hover:bg-maroon-900 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 self-start sm:self-auto cursor-pointer">
+                            <i class="fa-solid fa-print"></i>
+                            <span data-i18n="btn_print_pnl">Cetak Penyata Untung & Rugi</span>
+                        </button>
+                    </div>
+
+                    <!-- Profit & Loss Interactive Bar Chart Section -->
+                    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div>
+                                <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-maroon-800 inline-block"></span>
+                                    <span data-i18n="pnl_chart_title">Graf Bar Perbandingan Hasil, Kos & Untung (RM)</span>
+                                </h3>
+                                <p class="text-xs text-slate-500" data-i18n="pnl_chart_sub">Visualisasi prestasi kewangan berdasarkan julat tarikh yang dipilih</p>
+                            </div>
+                            <span id="pnl-chart-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-maroon-50 text-maroon-800 text-xs font-bold self-start sm:self-auto">
+                                <i class="fa-solid fa-chart-column"></i>
+                                <span id="pnl-chart-mode-label">Ringkasan Kategori</span>
+                            </span>
+                        </div>
+                        <div class="h-72 w-full">
+                            <canvas id="pnlBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Formal Profit & Loss Statement Card -->
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                        <!-- Statement Header -->
+                        <div class="bg-gradient-to-r from-maroon-900 to-maroon-800 text-white p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-maroon-200" data-i18n="pnl_statement_badge">PENYATA KEWANGAN PERNIAGAAN</p>
+                                <h3 class="text-2xl font-display font-extrabold mt-1" id="pnl-company-title">SMARTBIZ ENTERPRISE</h3>
+                                <p class="text-xs text-maroon-200 mt-1" id="pnl-company-ssm">No. SSM: 202403128890 (003598211-K)</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="inline-block px-3.5 py-1.5 rounded-xl bg-white/15 text-xs font-bold" data-i18n="pnl_report_name">Penyata Untung & Rugi (Profit & Loss)</span>
+                                <p class="text-xs text-maroon-200 mt-2" id="pnl-period-label">Tempoh: Semua Rekod</p>
+                            </div>
+                        </div>
+
+                        <!-- Financial Breakdown Body -->
+                        <div class="p-6 sm:p-8 space-y-6">
+                            <!-- 1. REVENUE (HASIL) -->
+                            <div>
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider text-maroon-800 border-b-2 border-maroon-800/20 pb-2 mb-3" data-i18n="pnl_sec_revenue">1. HASIL / PENDAPATAN (REVENUE)</h4>
+                                <div class="space-y-2.5 text-sm">
+                                    <div class="flex justify-between items-center py-1">
+                                        <span class="text-slate-600" data-i18n="pnl_sales_revenue">Jualan Produk & Perkhidmatan (Sales)</span>
+                                        <span class="font-semibold text-slate-900" id="pnl-val-sales">RM 0.00</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-1">
+                                        <span class="text-slate-600" data-i18n="pnl_other_incomes">Pendapatan Lain-lain (Other Incomes)</span>
+                                        <span class="font-semibold text-slate-900" id="pnl-val-incomes">RM 0.00</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2.5 px-3.5 bg-emerald-50/70 rounded-xl font-bold text-emerald-900">
+                                        <span data-i18n="pnl_total_revenue">JUMLAH HASIL (TOTAL REVENUE)</span>
+                                        <span id="pnl-val-total-rev">RM 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. COST OF GOODS / PURCHASES (KOS BELIAN) -->
+                            <div>
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider text-maroon-800 border-b-2 border-maroon-800/20 pb-2 mb-3" data-i18n="pnl_sec_cogs">2. KOS PEMBELIAN STOK (COST OF PURCHASES)</h4>
+                                <div class="space-y-2.5 text-sm">
+                                    <div class="flex justify-between items-center py-1">
+                                        <span class="text-slate-600" data-i18n="pnl_purchases_cost">Pembelian Stok & Bahan Mentah (Purchases)</span>
+                                        <span class="font-semibold text-slate-900" id="pnl-val-purchases">RM 0.00</span>
+                                    </div>
+                                    <div class="flex justify-between items-center py-2.5 px-3.5 bg-slate-100 rounded-xl font-bold text-slate-900">
+                                        <span data-i18n="pnl_gross_profit">UNTUNG KASAR (GROSS PROFIT)</span>
+                                        <span id="pnl-val-gross">RM 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. OPERATING EXPENSES (PERBELANJAAN OPERASI) -->
+                            <div>
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider text-maroon-800 border-b-2 border-maroon-800/20 pb-2 mb-3" data-i18n="pnl_sec_expenses">3. PERBELANJAAN OPERASI (OPERATING EXPENSES)</h4>
+                                <div class="space-y-2.5 text-sm">
+                                    <div class="flex justify-between items-center py-1">
+                                        <span class="text-slate-600" data-i18n="pnl_operating_expenses">Jumlah Perbelanjaan Perniagaan (Expenses)</span>
+                                        <span class="font-semibold text-rose-700" id="pnl-val-expenses">RM 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. NET PROFIT / LOSS HIGHLIGHT -->
+                            <div id="pnl-net-box" class="p-5 sm:p-6 rounded-2xl bg-maroon-50 border-2 border-maroon-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-maroon-800" data-i18n="pnl_net_result_label">KEPUTUSAN BERSIH (NET PROFIT / LOSS)</span>
+                                    <p class="text-xs text-slate-600 mt-0.5" id="pnl-net-desc">Jumlah Hasil ditolak Kos Pembelian & Perbelanjaan</p>
+                                </div>
+                                <div class="text-2xl sm:text-3xl font-display font-extrabold text-maroon-900" id="pnl-val-net">RM 0.00</div>
+                            </div>
+
+                            <!-- 5. PAYMENT CHANNEL SUMMARY -->
+                            <div class="pt-4 border-t border-slate-200">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3" data-i18n="pnl_payment_summary">Ringkasan Aliran Tunai Mengikut Kaedah Bayaran</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="pnl-payment-cards"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== 4. COMPANY INFORMATION (MAKLUMAT SYARIKAT) SECTION ==================== -->
+                <section id="section-company" class="hidden space-y-6">
+                    <form onsubmit="saveCompanyInfo(event)" class="space-y-6">
+                        <!-- Top Banner Card -->
+                        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-2xl bg-maroon-50 border-2 border-dashed border-maroon-300 flex items-center justify-center overflow-hidden shrink-0" id="company-logo-preview-box">
+                                    <i class="fa-solid fa-building text-maroon-800 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900" data-i18n="comp_page_title">Profil & Maklumat Syarikat</h3>
+                                    <p class="text-xs text-slate-500" data-i18n="comp_page_sub">Lengkapkan maklumat perniagaan anda untuk paparan penyata kewangan & resit.</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="px-5 py-2.5 bg-maroon-800 hover:bg-maroon-900 text-white font-bold text-sm rounded-xl shadow-md shadow-maroon-800/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span data-i18n="btn_save_company">Simpan Maklumat</span>
+                            </button>
+                        </div>
+
+                        <!-- SECTION A: COMPANY INFORMATION -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                            <div class="bg-maroon-800 text-white px-6 py-3.5 flex items-center justify-between">
+                                <h4 class="font-bold text-sm tracking-wide">A. Company Information / Maklumat Syarikat</h4>
+                                <span class="text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full">Bahagian A</span>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Company Name <span class="text-slate-400 font-normal">(Nama syarikat)</span> *</label>
+                                    <input type="text" id="comp-name" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Company Registration No. <span class="text-slate-400 font-normal">(Nombor pendaftaran SSM)</span></label>
+                                    <input type="text" id="comp-ssm" placeholder="Contoh: 202403128890 (003598211-K)" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Business Type <span class="text-slate-400 font-normal">(Jenis perniagaan)</span></label>
+                                    <select id="comp-type" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                        <option value="Sole Proprietorship (Milikan Tunggal)">Sole Proprietorship (Milikan Tunggal)</option>
+                                        <option value="Partnership (Perkongsian)">Partnership (Perkongsian)</option>
+                                        <option value="Sdn. Bhd. (Sendirian Berhad)">Sdn. Bhd. (Sendirian Berhad)</option>
+                                        <option value="Enterprise / Freelance">Enterprise / Freelance</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Business Category <span class="text-slate-400 font-normal">(Kategori perniagaan)</span></label>
+                                    <input type="text" id="comp-category" placeholder="Contoh: Peruncitan / Makanan & Minuman / Servis" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Company Logo <span class="text-slate-400 font-normal">(Logo syarikat - Muat naik gambar)</span></label>
+                                    <input type="file" id="comp-logo-input" accept="image/*" onchange="handleLogoUpload(event)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-maroon-800 file:text-white hover:file:bg-maroon-900">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Date Established <span class="text-slate-400 font-normal">(Tarikh penubuhan)</span></label>
+                                    <input type="date" id="comp-established" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION B: CONTACT INFORMATION -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                            <div class="bg-maroon-800 text-white px-6 py-3.5 flex items-center justify-between">
+                                <h4 class="font-bold text-sm tracking-wide">B. Contact Information / Maklumat Perhubungan</h4>
+                                <span class="text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full">Bahagian B</span>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Company Email <span class="text-slate-400 font-normal">(Email syarikat)</span></label>
+                                    <input type="email" id="comp-email" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number <span class="text-slate-400 font-normal">(Nombor telefon)</span></label>
+                                    <input type="text" id="comp-phone" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Business Address <span class="text-slate-400 font-normal">(Alamat perniagaan)</span></label>
+                                    <input type="text" id="comp-address" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">City <span class="text-slate-400 font-normal">(Bandar)</span></label>
+                                    <input type="text" id="comp-city" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">State <span class="text-slate-400 font-normal">(Negeri)</span></label>
+                                        <select id="comp-state" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                            <option value="Selangor">Selangor</option>
+                                            <option value="W.P. Kuala Lumpur">W.P. Kuala Lumpur</option>
+                                            <option value="Johor">Johor</option>
+                                            <option value="Pulau Pinang">Pulau Pinang</option>
+                                            <option value="Perak">Perak</option>
+                                            <option value="Kedah">Kedah</option>
+                                            <option value="Kelantan">Kelantan</option>
+                                            <option value="Terengganu">Terengganu</option>
+                                            <option value="Pahang">Pahang</option>
+                                            <option value="Negeri Sembilan">Negeri Sembilan</option>
+                                            <option value="Melaka">Melaka</option>
+                                            <option value="Perlis">Perlis</option>
+                                            <option value="Sabah">Sabah</option>
+                                            <option value="Sarawak">Sarawak</option>
+                                            <option value="W.P. Putrajaya">W.P. Putrajaya</option>
+                                            <option value="W.P. Labuan">W.P. Labuan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">Postcode <span class="text-slate-400 font-normal">(Poskod)</span></label>
+                                        <input type="text" id="comp-postcode" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION C: BUSINESS DETAILS -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                            <div class="bg-maroon-800 text-white px-6 py-3.5 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-sm tracking-wide">C. Business Details / Butiran Perniagaan</h4>
+                                    <p class="text-[11px] text-maroon-200">Bahagian ini penting untuk pengurusan kewangan.</p>
+                                </div>
+                                <span class="text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full">Bahagian C</span>
+                            </div>
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Business Owner <span class="text-slate-400 font-normal">(Nama pemilik)</span></label>
+                                    <input type="text" id="comp-owner" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Business Size <span class="text-slate-400 font-normal">(Micro / Small / Medium)</span></label>
+                                    <select id="comp-size" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                        <option value="Micro">Micro (Mikro)</option>
+                                        <option value="Small">Small (Kecil)</option>
+                                        <option value="Medium">Medium (Sederhana)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Currency <span class="text-slate-400 font-normal">(Mata wang)</span></label>
+                                    <input type="text" id="comp-currency" value="Malaysian Ringgit (RM)" readonly class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Financial Year Start <span class="text-slate-400 font-normal">(Tarikh permulaan tahun kewangan)</span></label>
+                                    <input type="date" id="comp-fy-start" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Tax Registration No. <span class="text-slate-400 font-normal">(Nombor pendaftaran cukai - jika berkaitan)</span></label>
+                                    <input type="text" id="comp-tax" placeholder="Contoh: C 25849102090 / SST-01-2345" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                                </div>
+                                <div class="md:col-span-2 bg-amber-50 border border-amber-200/80 rounded-xl p-3.5 flex items-start gap-2.5">
+                                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                                    <p class="text-xs italic text-amber-900" data-i18n="comp_note_optional">
+                                        Nota: Maklumat seperti nombor SSM dan cukai boleh dijadikan pilihan jika perniagaan belum berdaftar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: ADD / EDIT RECORD ==================== -->
+    <div id="record-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-fadeIn">
+            <div class="bg-maroon-800 text-white px-6 py-4 flex items-center justify-between">
+                <h3 id="modal-title" class="font-bold text-base">Tambah Rekod Baharu</h3>
+                <button onclick="closeRecordModal()" class="text-white/80 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="record-form" onsubmit="saveRecord(event)" class="p-6 space-y-4">
+                <input type="hidden" id="rec-id">
+
+                <!-- Date Field -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="field_date">Tarikh (Date) *</label>
+                    <input type="date" id="rec-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                </div>
+
+                <!-- Product Selection / Name -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700" data-i18n="field_product">Produk / Perkara (Product) *</label>
+                        <select id="rec-product-preset" onchange="applyProductPreset()" class="hidden text-[11px] font-semibold text-maroon-800 bg-maroon-50 border border-maroon-200 rounded-lg px-2 py-0.5 focus:outline-none">
+                            <option value="">-- Pilih dari Senarai Produk --</option>
+                        </select>
+                    </div>
+                    <input type="text" id="rec-product" required placeholder="Nama produk atau item..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                </div>
+
+                <!-- Category / SKU (Only for Products module) -->
+                <div id="rec-category-wrap" class="hidden">
+                    <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="field_category">Kategori / Kod SKU</label>
+                    <input type="text" id="rec-category" placeholder="Contoh: Makanan / SKU-001" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-maroon-800 focus:outline-none">
+                </div>
+
+                <!-- Quantity & Unit Price -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="field_qty">Kuantiti (Quantity) *</label>
+                        <input type="number" id="rec-qty" min="1" step="1" value="1" required oninput="updateModalSubtotal()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-maroon-800 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="field_price">Harga Seunit (RM) *</label>
+                        <input type="number" id="rec-price" min="0" step="0.01" required oninput="updateModalSubtotal()" placeholder="0.00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-maroon-800 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Payment Method (Shown on Purchases, Sales, Incomes, Expenses) -->
+                <div id="rec-payment-wrap">
+                    <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="field_payment">Kaedah Bayaran (Payment Method) *</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rec-payment" value="Cash" checked class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center text-xs font-bold text-slate-600 peer-checked:bg-maroon-800 peer-checked:text-white peer-checked:border-maroon-800 transition-all">
+                                <i class="fa-solid fa-money-bill-wave block mb-1"></i> Cash
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rec-payment" value="Online Banking" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center text-xs font-bold text-slate-600 peer-checked:bg-maroon-800 peer-checked:text-white peer-checked:border-maroon-800 transition-all">
+                                <i class="fa-solid fa-building-columns block mb-1"></i> Online
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rec-payment" value="E-Wallet" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center text-xs font-bold text-slate-600 peer-checked:bg-maroon-800 peer-checked:text-white peer-checked:border-maroon-800 transition-all">
+                                <i class="fa-solid fa-qrcode block mb-1"></i> E-Wallet
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rec-payment" value="Card" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center text-xs font-bold text-slate-600 peer-checked:bg-maroon-800 peer-checked:text-white peer-checked:border-maroon-800 transition-all">
+                                <i class="fa-regular fa-credit-card block mb-1"></i> Kad
+                            </div>
+                        </label>
+                        <label class="cursor-pointer col-span-2">
+                            <input type="radio" name="rec-payment" value="Other" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center text-xs font-bold text-slate-600 peer-checked:bg-maroon-800 peer-checked:text-white peer-checked:border-maroon-800 transition-all">
+                                <i class="fa-solid fa-ellipsis block mb-1"></i> Lain-lain (Other)
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Calculated Total Preview -->
+                <div class="bg-maroon-50 border border-maroon-200/80 rounded-2xl p-3.5 flex items-center justify-between">
+                    <span class="text-xs font-bold text-maroon-800" data-i18n="modal_total_calc">Jumlah Keseluruhan:</span>
+                    <span class="text-lg font-display font-extrabold text-maroon-900" id="modal-subtotal">RM 0.00</span>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <button type="button" onclick="closeRecordModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer" data-i18n="btn_cancel">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-maroon-800 hover:bg-maroon-900 text-white text-xs font-bold shadow-md cursor-pointer" data-i18n="btn_save">Simpan Rekod</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: DELETE CONFIRMATION ==================== -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-trash-can text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-900" data-i18n="del_title">Padam Rekod Ini?</h3>
+                <p class="text-xs text-slate-500 mt-1" data-i18n="del_desc">Tindakan ini tidak boleh dikembalikan. Adakah anda pasti mahu memadam rekod ini?</p>
+            </div>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer" data-i18n="btn_cancel">Batal</button>
+                <button onclick="confirmDelete()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md cursor-pointer" data-i18n="btn_confirm_delete">Ya, Padam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== APPLICATION LOGIC ==================== -->
+    <script>
+        // --- 1. BILINGUAL DICTIONARY (BM / EN) ---
+        const translations = {
+            ms: {
+                auth_tab_login: "Log Masuk",
+                auth_tab_signup: "Daftar Akaun",
+                auth_welcome_title: "Selamat Kembali!",
+                auth_welcome_sub: "Sila masukkan maklumat akaun anda untuk meneruskan.",
+                auth_signup_title: "Cipta Akaun Baru",
+                auth_signup_sub: "Daftar untuk mula menguruskan rekod kewangan perniagaan anda.",
+                auth_fullname_label: "NAMA PENUH / SYARIKAT",
+                auth_email_label: "EMEL ATAU NAMA PENGGUNA",
+                auth_password_label: "KATA LALUAN",
+                auth_btn_login: "Log Masuk ke Sistem",
+                auth_btn_signup: "Daftar Akaun Sekarang",
+                auth_no_account_hint: "Pengguna baharu?",
+                nav_main_menu: "MENU UTAMA",
+                nav_dashboard: "Dashboard",
+                nav_products: "Produk",
+                nav_purchases: "Pembelian",
+                nav_sales: "Jualan",
+                nav_incomes: "Pendapatan",
+                nav_expenses: "Perbelanjaan",
+                nav_reports_settings: "LAPORAN & TETAPAN",
+                nav_pnl: "Untung & Rugi",
+                nav_company: "Maklumat Syarikat",
+                btn_logout: "Log Keluar",
+                kpi_sales: "Jumlah Jualan",
+                kpi_incomes: "Pendapatan Lain",
+                kpi_purchases: "Jumlah Pembelian",
+                kpi_expenses: "Perbelanjaan",
+                kpi_net_profit: "Untung / Rugi Bersih",
+                chart_overview_title: "Ringkasan Aliran Kewangan (RM)",
+                chart_overview_sub: "Perbandingan Jualan, Pendapatan, Pembelian & Perbelanjaan",
+                period_all: "Keseluruhan",
+                period_month: "Bulan Ini",
+                period_6m: "6 Bulan",
+                payment_breakdown_title: "Pecahan Kaedah Bayaran",
+                payment_breakdown_sub: "Berdasarkan jumlah jualan & pendapatan masuk",
+                total_products_label: "Jumlah Produk Aktif",
+                recent_tx_title: "Transaksi Terkini",
+                recent_tx_sub: "Rekod aktiviti kewangan terbaharu merentas semua modul",
+                col_date: "Tarikh",
+                col_type: "Jenis",
+                col_product: "Produk / Perkara",
+                col_category: "Kategori / SKU",
+                col_qty: "Kuantiti",
+                col_price: "Harga (RM)",
+                col_payment: "Kaedah Bayaran",
+                col_total: "Jumlah (RM)",
+                col_actions: "Tindakan",
+                filter_all_payments: "Semua Kaedah Bayaran",
+                summary_total_records: "Jumlah Rekod",
+                summary_total_qty: "Jumlah Kuantiti",
+                summary_total_value: "Jumlah Keseluruhan",
+                empty_records: "Tiada rekod ditemui.",
+                empty_records_sub: "Klik butang tambah di atas untuk memasukkan rekod baharu.",
+                pnl_from_date: "Dari Tarikh",
+                pnl_to_date: "Hingga Tarikh",
+                pnl_all_dates: "Semua Tarikh",
+                btn_print_pnl: "Cetak Penyata Untung & Rugi",
+                pnl_chart_title: "Graf Bar Perbandingan Hasil, Kos & Untung (RM)",
+                pnl_chart_sub: "Visualisasi prestasi kewangan berdasarkan julat tarikh yang dipilih",
+                pnl_statement_badge: "PENYATA KEWANGAN PERNIAGAAN",
+                pnl_report_name: "Penyata Untung & Rugi (Profit & Loss)",
+                pnl_sec_revenue: "1. HASIL / PENDAPATAN (REVENUE)",
+                pnl_sales_revenue: "Jualan Produk & Perkhidmatan (Sales)",
+                pnl_other_incomes: "Pendapatan Lain-lain (Other Incomes)",
+                pnl_total_revenue: "JUMLAH HASIL (TOTAL REVENUE)",
+                pnl_sec_cogs: "2. KOS PEMBELIAN STOK (COST OF PURCHASES)",
+                pnl_purchases_cost: "Pembelian Stok & Bahan Mentah (Purchases)",
+                pnl_gross_profit: "UNTUNG KASAR (GROSS PROFIT)",
+                pnl_sec_expenses: "3. PERBELANJAAN OPERASI (OPERATING EXPENSES)",
+                pnl_operating_expenses: "Jumlah Perbelanjaan Perniagaan (Expenses)",
+                pnl_net_result_label: "KEPUTUSAN BERSIH (NET PROFIT / LOSS)",
+                pnl_payment_summary: "Ringkasan Aliran Tunai Mengikut Kaedah Bayaran",
+                comp_page_title: "Profil & Maklumat Syarikat",
+                comp_page_sub: "Lengkapkan maklumat perniagaan anda untuk paparan penyata kewangan & resit.",
+                btn_save_company: "Simpan Maklumat",
+                comp_note_optional: "Nota: Maklumat seperti nombor SSM dan cukai boleh dijadikan pilihan jika perniagaan belum berdaftar.",
+                field_date: "Tarikh (Date) *",
+                field_product: "Produk / Perkara (Product) *",
+                field_category: "Kategori / Kod SKU",
+                field_qty: "Kuantiti (Quantity) *",
+                field_price: "Harga Seunit (RM) *",
+                field_payment: "Kaedah Bayaran (Payment Method) *",
+                modal_total_calc: "Jumlah Keseluruhan:",
+                btn_cancel: "Batal",
+                btn_save: "Simpan Rekod",
+                del_title: "Padam Rekod Ini?",
+                del_desc: "Tindakan ini tidak boleh dikembalikan. Adakah anda pasti mahu memadam rekod ini?",
+                btn_confirm_delete: "Ya, Padam"
+            },
+            en: {
+                auth_tab_login: "Log In",
+                auth_tab_signup: "Sign Up",
+                auth_welcome_title: "Welcome Back!",
+                auth_welcome_sub: "Please enter your account details to continue.",
+                auth_signup_title: "Create New Account",
+                auth_signup_sub: "Register to start managing your business financial records.",
+                auth_fullname_label: "FULL NAME / COMPANY",
+                auth_email_label: "EMAIL OR USERNAME",
+                auth_password_label: "PASSWORD",
+                auth_btn_login: "Log In to System",
+                auth_btn_signup: "Create Account Now",
+                auth_no_account_hint: "New user?",
+                nav_main_menu: "MAIN MENU",
+                nav_dashboard: "Dashboard",
+                nav_products: "Products",
+                nav_purchases: "Purchases",
+                nav_sales: "Sales",
+                nav_incomes: "Incomes",
+                nav_expenses: "Expenses",
+                nav_reports_settings: "REPORTS & SETTINGS",
+                nav_pnl: "Profit & Loss",
+                nav_company: "Company Info",
+                btn_logout: "Log Out",
+                kpi_sales: "Total Sales",
+                kpi_incomes: "Other Incomes",
+                kpi_purchases: "Total Purchases",
+                kpi_expenses: "Total Expenses",
+                kpi_net_profit: "Net Profit / Loss",
+                chart_overview_title: "Financial Cashflow Overview (RM)",
+                chart_overview_sub: "Comparison of Sales, Incomes, Purchases & Expenses",
+                period_all: "All Time",
+                period_month: "This Month",
+                period_6m: "6 Months",
+                payment_breakdown_title: "Payment Method Breakdown",
+                payment_breakdown_sub: "Based on incoming sales & other incomes",
+                total_products_label: "Total Active Products",
+                recent_tx_title: "Recent Transactions",
+                recent_tx_sub: "Latest financial activities across all business modules",
+                col_date: "Date",
+                col_type: "Type",
+                col_product: "Product / Item",
+                col_category: "Category / SKU",
+                col_qty: "Quantity",
+                col_price: "Price (RM)",
+                col_payment: "Payment Method",
+                col_total: "Total (RM)",
+                col_actions: "Actions",
+                filter_all_payments: "All Payment Methods",
+                summary_total_records: "Total Records",
+                summary_total_qty: "Total Quantity",
+                summary_total_value: "Grand Total",
+                empty_records: "No records found.",
+                empty_records_sub: "Click the add button above to insert a new record.",
+                pnl_from_date: "From Date",
+                pnl_to_date: "To Date",
+                pnl_all_dates: "All Dates",
+                btn_print_pnl: "Print Profit & Loss Statement",
+                pnl_chart_title: "Revenue, Cost & Net Profit Bar Chart (RM)",
+                pnl_chart_sub: "Financial performance breakdown based on selected date range",
+                pnl_statement_badge: "BUSINESS FINANCIAL STATEMENT",
+                pnl_report_name: "Profit & Loss Statement (Untung & Rugi)",
+                pnl_sec_revenue: "1. REVENUE (HASIL / PENDAPATAN)",
+                pnl_sales_revenue: "Product & Service Sales",
+                pnl_other_incomes: "Other Business Incomes",
+                pnl_total_revenue: "TOTAL REVENUE",
+                pnl_sec_cogs: "2. COST OF PURCHASES (KOS BELIAN)",
+                pnl_purchases_cost: "Stock & Raw Material Purchases",
+                pnl_gross_profit: "GROSS PROFIT",
+                pnl_sec_expenses: "3. OPERATING EXPENSES (PERBELANJAAN)",
+                pnl_operating_expenses: "Total Business Operating Expenses",
+                pnl_net_result_label: "NET PROFIT / LOSS",
+                pnl_payment_summary: "Cashflow Summary by Payment Method",
+                comp_page_title: "Company Profile & Information",
+                comp_page_sub: "Complete your business details for financial statements & receipts.",
+                btn_save_company: "Save Information",
+                comp_note_optional: "Note: Information such as SSM and tax numbers can be optional if the business is not yet registered.",
+                field_date: "Date *",
+                field_product: "Product / Item *",
+                field_category: "Category / SKU Code",
+                field_qty: "Quantity *",
+                field_price: "Unit Price (RM) *",
+                field_payment: "Payment Method *",
+                modal_total_calc: "Total Amount:",
+                btn_cancel: "Cancel",
+                btn_save: "Save Record",
+                del_title: "Delete This Record?",
+                del_desc: "This action cannot be undone. Are you sure you want to delete this record?",
+                btn_confirm_delete: "Yes, Delete"
+            }
+        };
+
+        // --- 2. CLEAN INITIAL DATA STRUCTURE (NO DEMO / DUMMY RECORDS) ---
+        function createEmptyUserData(companyName = '') {
+            return {
+                products: [],
+                purchases: [],
+                sales: [],
+                incomes: [],
+                expenses: [],
+                company: {
+                    name: companyName || 'SMARTBIZ ENTERPRISE',
+                    ssm: '',
+                    type: 'Sole Proprietorship (Milikan Tunggal)',
+                    category: '',
+                    logo: '',
+                    established: '',
+                    email: '',
+                    phone: '',
+                    address: '',
+                    city: '',
+                    state: 'Selangor',
+                    postcode: '',
+                    owner: '',
+                    size: 'Micro',
+                    currency: 'Malaysian Ringgit (RM)',
+                    fyStart: '',
+                    tax: ''
+                }
+            };
+        }
+
+        // --- 3. STATE MANAGEMENT (PER-USER ISOLATED STORAGE) ---
+        let state = {
+            lang: localStorage.getItem('smartbiz_lang') || 'ms',
+            currentUser: JSON.parse(localStorage.getItem('smartbiz_current_user') || 'null'),
+            users: JSON.parse(localStorage.getItem('smartbiz_users') || '[]'),
+            activeModule: 'dashboard',
+            dashChartPeriod: 'all',
+            data: createEmptyUserData(),
+            deleteTarget: null,
+            chartInstance: null,
+            pnlChartInstance: null
+        };
+
+        function getUserStorageKey(email) {
+            return 'smartbiz_user_data_' + email.toLowerCase().trim();
+        }
+
+        function loadUserData(user) {
+            const key = getUserStorageKey(user.email);
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                state.data = JSON.parse(saved);
+            } else {
+                state.data = createEmptyUserData(user.name);
+                state.data.company.email = user.email;
+                state.data.company.owner = user.name;
+                persistData();
+            }
+        }
+
+        function persistData() {
+            if (!state.currentUser) return;
+            const key = getUserStorageKey(state.currentUser.email);
+            localStorage.setItem(key, JSON.stringify(state.data));
+        }
+
+        function formatRM(num) {
+            const val = Number(num) || 0;
+            return 'RM ' + val.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? 'bg-red-600' : 'bg-maroon-900';
+            toast.className = `${bg} text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2800);
+        }
+
+        // --- 4. LANGUAGE SWITCHING ---
+        function setLanguage(lang) {
+            state.lang = lang;
+            localStorage.setItem('smartbiz_lang', lang);
+
+            // Update toggle buttons styling
+            ['auth-lang-', 'app-lang-'].forEach(prefix => {
+                const msBtn = document.getElementById(prefix + 'ms');
+                const enBtn = document.getElementById(prefix + 'en');
+                if (msBtn && enBtn) {
+                    if (lang === 'ms') {
+                        msBtn.className = 'px-3 py-1 rounded-xl text-xs font-bold transition-all bg-maroon-800 text-white shadow-sm';
+                        enBtn.className = 'px-3 py-1 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-maroon-800';
+                    } else {
+                        enBtn.className = 'px-3 py-1 rounded-xl text-xs font-bold transition-all bg-maroon-800 text-white shadow-sm';
+                        msBtn.className = 'px-3 py-1 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-maroon-800';
+                    }
+                }
+            });
+
+            // Translate all [data-i18n] elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            // Refresh active view
+            if (state.currentUser) {
+                updateTopbarTitle();
+                if (state.activeModule === 'dashboard') renderDashboard();
+                else if (state.activeModule === 'pnl') renderPnL();
+                else if (['products', 'purchases', 'sales', 'incomes', 'expenses'].includes(state.activeModule)) {
+                    renderCrudTable();
+                }
+            }
+        }
+
+        // --- 5. AUTHENTICATION LOGIC ---
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            document.getElementById('login-error').classList.add('hidden');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                tabLogin.className = 'py-2.5 text-sm font-bold rounded-xl bg-white text-maroon-800 shadow-sm transition-all';
+                tabSignup.className = 'py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition-all';
+            } else {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                tabSignup.className = 'py-2.5 text-sm font-bold rounded-xl bg-white text-maroon-800 shadow-sm transition-all';
+                tabLogin.className = 'py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition-all';
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
+            const passInput = document.getElementById('login-password').value;
+            const errBox = document.getElementById('login-error');
+
+            const user = state.users.find(u =>
+                (u.email.toLowerCase() === emailInput || u.name.toLowerCase() === emailInput) &&
+                u.password === passInput
+            );
+
+            if (!user) {
+                errBox.textContent = state.lang === 'ms'
+                    ? 'Akaun tidak ditemui atau kata laluan salah. Sila daftar akaun baharu jika belum mendaftar.'
+                    : 'Account not found or incorrect password. Please sign up if you do not have an account.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            state.currentUser = user;
+            localStorage.setItem('smartbiz_current_user', JSON.stringify(user));
+            loadUserData(user);
+            enterApp();
+            showToast(state.lang === 'ms' ? `Selamat datang, ${user.name}!` : `Welcome back, ${user.name}!`);
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const password = document.getElementById('signup-password').value;
+
+            if (state.users.some(u => u.email.toLowerCase() === email)) {
+                showToast(state.lang === 'ms' ? 'Emel ini telah didaftarkan!' : 'Email already registered!', 'error');
+                return;
+            }
+
+            const newUser = { name, email, password };
+            state.users.push(newUser);
+            localStorage.setItem('smartbiz_users', JSON.stringify(state.users));
+            state.currentUser = newUser;
+            localStorage.setItem('smartbiz_current_user', JSON.stringify(newUser));
+            loadUserData(newUser);
+            enterApp();
+            showToast(state.lang === 'ms' ? 'Akaun berjaya didaftarkan!' : 'Account created successfully!');
+        }
+
+        function handleLogout() {
+            state.currentUser = null;
+            localStorage.removeItem('smartbiz_current_user');
+            document.getElementById('app-shell').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            showToast(state.lang === 'ms' ? 'Anda telah log keluar dari sistem.' : 'You have logged out.');
+        }
+
+        function enterApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-shell').classList.remove('hidden');
+
+            document.getElementById('sidebar-user-name').textContent = state.currentUser.name;
+            document.getElementById('sidebar-user-email').textContent = state.currentUser.email;
+            document.getElementById('sidebar-user-avatar').textContent = state.currentUser.name.charAt(0).toUpperCase();
+
+            loadCompanyForm();
+            navigateTo('dashboard');
+        }
+
+        // --- 6. NAVIGATION & SIDEBAR ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        function updateTopbarTitle() {
+            const map = {
+                dashboard: translations[state.lang].nav_dashboard,
+                products: translations[state.lang].nav_products,
+                purchases: translations[state.lang].nav_purchases,
+                sales: translations[state.lang].nav_sales,
+                incomes: translations[state.lang].nav_incomes,
+                expenses: translations[state.lang].nav_expenses,
+                pnl: translations[state.lang].nav_pnl,
+                company: translations[state.lang].nav_company
+            };
+            document.getElementById('topbar-title').textContent = map[state.activeModule] || 'SMARTBIZ';
+            document.getElementById('header-company-name').textContent = state.data.company.name || 'SMARTBIZ ENTERPRISE';
+        }
+
+        function navigateTo(moduleName) {
+            state.activeModule = moduleName;
+            updateTopbarTitle();
+
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-maroon-100 hover:bg-white/10 transition-all cursor-pointer';
+            });
+            const activeBtn = document.getElementById('nav-' + moduleName);
+            if (activeBtn) {
+                activeBtn.className = 'nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-maroon-900 shadow-md cursor-pointer';
+            }
+
+            // Hide all sections
+            ['section-dashboard', 'section-crud', 'section-pnl', 'section-company'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            if (moduleName === 'dashboard') {
+                document.getElementById('section-dashboard').classList.remove('hidden');
+                renderDashboard();
+            } else if (moduleName === 'pnl') {
+                document.getElementById('section-pnl').classList.remove('hidden');
+                renderPnL();
+            } else if (moduleName === 'company') {
+                document.getElementById('section-company').classList.remove('hidden');
+                loadCompanyForm();
+            } else {
+                document.getElementById('section-crud').classList.remove('hidden');
+                document.getElementById('crud-search').value = '';
+                document.getElementById('crud-filter-payment').value = 'ALL';
+                renderCrudTable();
+            }
+        }
+
+        // --- 7. DASHBOARD RENDERING ---
+        function setDashChartPeriod(period) {
+            state.dashChartPeriod = period;
+            ['all', 'month', '6m'].forEach(p => {
+                const btn = document.getElementById('dash-period-' + p);
+                if (!btn) return;
+                if (p === period) {
+                    btn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-maroon-800 text-white shadow-xs cursor-pointer';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-maroon-800 cursor-pointer';
+                }
+            });
+            renderDashboard();
+        }
+
+        function filterRecordsByDashPeriod(arr) {
+            if (state.dashChartPeriod === 'all') return arr;
+            const now = new Date();
+            if (state.dashChartPeriod === 'month') {
+                const ym = now.toISOString().slice(0, 7);
+                return arr.filter(item => item.date && item.date.startsWith(ym));
+            }
+            if (state.dashChartPeriod === '6m') {
+                const cutoff = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+                const cutoffStr = cutoff.toISOString().split('T')[0];
+                return arr.filter(item => item.date && item.date >= cutoffStr);
+            }
+            return arr;
+        }
+
+        function renderDashboard() {
+            const sumTotal = arr => arr.reduce((acc, item) => acc + (Number(item.qty) * Number(item.price)), 0);
+
+            const totalSales = sumTotal(state.data.sales);
+            const totalIncomes = sumTotal(state.data.incomes);
+            const totalPurchases = sumTotal(state.data.purchases);
+            const totalExpenses = sumTotal(state.data.expenses);
+            const netProfit = (totalSales + totalIncomes) - (totalPurchases + totalExpenses);
+
+            document.getElementById('dash-total-sales').textContent = formatRM(totalSales);
+            document.getElementById('dash-sales-count').textContent = `${state.data.sales.length} ${state.lang === 'ms' ? 'transaksi jualan' : 'sales records'}`;
+
+            document.getElementById('dash-total-incomes').textContent = formatRM(totalIncomes);
+            document.getElementById('dash-incomes-count').textContent = `${state.data.incomes.length} ${state.lang === 'ms' ? 'rekod pendapatan' : 'income records'}`;
+
+            document.getElementById('dash-total-purchases').textContent = formatRM(totalPurchases);
+            document.getElementById('dash-purchases-count').textContent = `${state.data.purchases.length} ${state.lang === 'ms' ? 'rekod belian' : 'purchase records'}`;
+
+            document.getElementById('dash-total-expenses').textContent = formatRM(totalExpenses);
+            document.getElementById('dash-expenses-count').textContent = `${state.data.expenses.length} ${state.lang === 'ms' ? 'rekod belanja' : 'expense records'}`;
+
+            document.getElementById('dash-net-profit').textContent = formatRM(netProfit);
+            document.getElementById('dash-profit-status').textContent = netProfit >= 0
+                ? (state.lang === 'ms' ? '▲ Untung Bersih (Surplus)' : '▲ Net Profit (Surplus)')
+                : (state.lang === 'ms' ? '▼ Rugi Bersih (Deficit)' : '▼ Net Loss (Deficit)');
+
+            document.getElementById('dash-product-count').textContent = `${state.data.products.length} ${state.lang === 'ms' ? 'Produk' : 'Products'}`;
+
+            // Render Chart.js on Dashboard (respects period filter)
+            const chartSales = sumTotal(filterRecordsByDashPeriod(state.data.sales));
+            const chartIncomes = sumTotal(filterRecordsByDashPeriod(state.data.incomes));
+            const chartPurchases = sumTotal(filterRecordsByDashPeriod(state.data.purchases));
+            const chartExpenses = sumTotal(filterRecordsByDashPeriod(state.data.expenses));
+            const chartNet = (chartSales + chartIncomes) - (chartPurchases + chartExpenses);
+
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            if (state.chartInstance) state.chartInstance.destroy();
+
+            const labels = state.lang === 'ms'
+                ? ['Jualan', 'Pendapatan Lain', 'Pembelian', 'Perbelanjaan', 'Untung Bersih']
+                : ['Sales', 'Other Incomes', 'Purchases', 'Expenses', 'Net Profit'];
+
+            state.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'RM',
+                        data: [chartSales, chartIncomes, chartPurchases, chartExpenses, chartNet],
+                        backgroundColor: [
+                            '#800020',
+                            '#f59e0b',
+                            '#64748b',
+                            '#e11d48',
+                            chartNet >= 0 ? '#10b981' : '#dc2626'
+                        ],
+                        borderRadius: 10,
+                        maxBarThickness: 44
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#3b000d',
+                            padding: 10,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: context => ' ' + formatRM(context.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: Math.max(chartSales, chartIncomes, chartPurchases, chartExpenses, Math.abs(chartNet), 100),
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                font: { size: 11, weight: '600' },
+                                callback: val => 'RM ' + Number(val).toLocaleString('en-MY')
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 11, weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Payment Method Breakdown (Incoming: Sales + Incomes)
+            const incoming = [...state.data.sales, ...state.data.incomes];
+            const totalIn = sumTotal(incoming) || 1;
+            const methods = ['Cash', 'Online Banking', 'E-Wallet', 'Card', 'Other'];
+            const breakdownEl = document.getElementById('dash-payment-breakdown');
+            breakdownEl.innerHTML = methods.map(m => {
+                const mSum = incoming.filter(i => i.payment === m).reduce((a, b) => a + (b.qty * b.price), 0);
+                const pct = Math.round((mSum / totalIn) * 100);
+                return `
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">${m}</span>
+                            <span class="text-slate-900">${formatRM(mSum)} (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-maroon-800 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Recent Transactions Table
+            const allTx = [
+                ...state.data.sales.map(x => ({ ...x, type: state.lang === 'ms' ? 'Jualan' : 'Sale', badge: 'bg-emerald-50 text-emerald-700', sign: '+' })),
+                ...state.data.incomes.map(x => ({ ...x, type: state.lang === 'ms' ? 'Pendapatan' : 'Income', badge: 'bg-blue-50 text-blue-700', sign: '+' })),
+                ...state.data.purchases.map(x => ({ ...x, type: state.lang === 'ms' ? 'Pembelian' : 'Purchase', badge: 'bg-amber-50 text-amber-700', sign: '-' })),
+                ...state.data.expenses.map(x => ({ ...x, type: state.lang === 'ms' ? 'Perbelanjaan' : 'Expense', badge: 'bg-rose-50 text-rose-700', sign: '-' }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 7);
+
+            const tbody = document.getElementById('dash-recent-tbody');
+            if (allTx.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-xs text-slate-400">
+                            ${state.lang === 'ms' ? 'Belum ada rekod transaksi. Mula masukkan rekod di menu Produk, Pembelian, Jualan, Pendapatan atau Perbelanjaan.' : 'No transactions yet. Start adding records in Products, Purchases, Sales, Incomes or Expenses.'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            tbody.innerHTML = allTx.map(tx => `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3 px-4 text-xs font-medium text-slate-600">${tx.date}</td>
+                    <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${tx.badge}">${tx.type}</span></td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${tx.product}</td>
+                    <td class="py-3 px-4 text-center text-slate-600">${tx.qty}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">${tx.payment}</span></td>
+                    <td class="py-3 px-4 text-right font-bold ${tx.sign === '+' ? 'text-emerald-600' : 'text-rose-600'}">${tx.sign} ${formatRM(tx.qty * tx.price)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- 8. CRUD TABLE RENDERING (PRODUCTS, PURCHASES, SALES, INCOMES, EXPENSES) ---
+        function renderCrudTable() {
+            const mod = state.activeModule;
+            const isProduct = mod === 'products';
+            const search = document.getElementById('crud-search').value.toLowerCase();
+            const payFilter = document.getElementById('crud-filter-payment').value;
+
+            // Show/hide payment filter
+            document.getElementById('crud-filter-payment').classList.toggle('hidden', isProduct);
+
+            // Button label
+            const btnLabels = {
+                products: state.lang === 'ms' ? 'Tambah Produk' : 'Add Product',
+                purchases: state.lang === 'ms' ? 'Tambah Pembelian' : 'Add Purchase',
+                sales: state.lang === 'ms' ? 'Tambah Jualan' : 'Add Sale',
+                incomes: state.lang === 'ms' ? 'Tambah Pendapatan' : 'Add Income',
+                expenses: state.lang === 'ms' ? 'Tambah Perbelanjaan' : 'Add Expense'
+            };
+            document.getElementById('crud-add-btn-label').textContent = btnLabels[mod];
+
+            // Filter rows
+            let rows = state.data[mod] || [];
+            rows = rows.filter(item => {
+                const matchSearch = item.product.toLowerCase().includes(search) ||
+                    (item.category && item.category.toLowerCase().includes(search)) ||
+                    item.date.includes(search);
+                const matchPay = isProduct || payFilter === 'ALL' || item.payment === payFilter;
+                return matchSearch && matchPay;
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Update Stats
+            const totalQty = rows.reduce((acc, r) => acc + Number(r.qty), 0);
+            const totalVal = rows.reduce((acc, r) => acc + (Number(r.qty) * Number(r.price)), 0);
+            document.getElementById('crud-stat-count').textContent = rows.length;
+            document.getElementById('crud-stat-qty').textContent = totalQty;
+            document.getElementById('crud-stat-total').textContent = formatRM(totalVal);
+
+            // Table Header
+            const t = translations[state.lang];
+            document.getElementById('crud-thead').innerHTML = `
+                <tr class="bg-slate-50/90 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                    <th class="py-3.5 px-4">${t.col_date}</th>
+                    <th class="py-3.5 px-4">${t.col_product}</th>
+                    ${isProduct ? `<th class="py-3.5 px-4">${t.col_category}</th>` : ''}
+                    <th class="py-3.5 px-4 text-center">${t.col_qty}</th>
+                    <th class="py-3.5 px-4 text-right">${t.col_price}</th>
+                    ${!isProduct ? `<th class="py-3.5 px-4">${t.col_payment}</th>` : ''}
+                    <th class="py-3.5 px-4 text-right">${t.col_total}</th>
+                    <th class="py-3.5 px-4 text-center">${t.col_actions}</th>
+                </tr>
+            `;
+
+            const tbody = document.getElementById('crud-tbody');
+            const emptyState = document.getElementById('crud-empty-state');
+
+            if (rows.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = rows.map(item => {
+                const subtotal = Number(item.qty) * Number(item.price);
+                return `
+                    <tr class="hover:bg-maroon-50/30 transition-colors">
+                        <td class="py-3.5 px-4 text-xs font-medium text-slate-600 whitespace-nowrap">${item.date}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-800">${item.product}</td>
+                        ${isProduct ? `<td class="py-3.5 px-4 text-xs text-slate-500">${item.category || '-'}</td>` : ''}
+                        <td class="py-3.5 px-4 text-center font-semibold text-slate-700">${item.qty}</td>
+                        <td class="py-3.5 px-4 text-right text-slate-600">${formatRM(item.price)}</td>
+                        ${!isProduct ? `
+                            <td class="py-3.5 px-4">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">
+                                    <i class="fa-solid ${getPaymentIcon(item.payment)} text-[10px] text-maroon-800"></i>
+                                    ${item.payment}
+                                </span>
+                            </td>
+                        ` : ''}
+                        <td class="py-3.5 px-4 text-right font-extrabold text-maroon-900">${formatRM(subtotal)}</td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button onclick="openRecordModal('${item.id}')" title="Edit" class="p-2 rounded-xl bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white transition-all cursor-pointer">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                                <button onclick="openDeleteModal('${item.id}')" title="Delete" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white transition-all cursor-pointer">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function getPaymentIcon(method) {
+            if (method === 'Cash') return 'fa-money-bill-wave';
+            if (method === 'Online Banking') return 'fa-building-columns';
+            if (method === 'E-Wallet') return 'fa-qrcode';
+            if (method === 'Card') return 'fa-credit-card';
+            return 'fa-wallet';
+        }
+
+        // --- 9. ADD / EDIT / DELETE MODALS ---
+        function openRecordModal(id = null) {
+            const mod = state.activeModule;
+            const isProduct = mod === 'products';
+            const modal = document.getElementById('record-modal');
+            const presetSelect = document.getElementById('rec-product-preset');
+
+            document.getElementById('rec-id').value = id || '';
+            document.getElementById('rec-category-wrap').classList.toggle('hidden', !isProduct);
+            document.getElementById('rec-payment-wrap').classList.toggle('hidden', isProduct);
+
+            // Populate product dropdown helper for Sales / Purchases
+            if (!isProduct && state.data.products.length > 0) {
+                presetSelect.classList.remove('hidden');
+                presetSelect.innerHTML = `<option value="">${state.lang === 'ms' ? '-- Pilih dari Produk --' : '-- Pick from Products --'}</option>` +
+                    state.data.products.map(p => `<option value="${p.id}">${p.product} (${formatRM(p.price)})</option>`).join('');
+            } else {
+                presetSelect.classList.add('hidden');
+            }
+
+            if (id) {
+                const item = state.data[mod].find(r => r.id === id);
+                document.getElementById('modal-title').textContent = state.lang === 'ms' ? 'Kemaskini Rekod' : 'Edit Record';
+                document.getElementById('rec-date').value = item.date;
+                document.getElementById('rec-product').value = item.product;
+                document.getElementById('rec-category').value = item.category || '';
+                document.getElementById('rec-qty').value = item.qty;
+                document.getElementById('rec-price').value = item.price;
+                if (!isProduct && item.payment) {
+                    const radio = document.querySelector(`input[name="rec-payment"][value="${item.payment}"]`);
+                    if (radio) radio.checked = true;
+                }
+            } else {
+                document.getElementById('modal-title').textContent = state.lang === 'ms' ? 'Tambah Rekod Baharu' : 'Add New Record';
+                document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('rec-product').value = '';
+                document.getElementById('rec-category').value = '';
+                document.getElementById('rec-qty').value = 1;
+                document.getElementById('rec-price').value = '';
+                document.querySelector('input[name="rec-payment"][value="Cash"]').checked = true;
+            }
+
+            updateModalSubtotal();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeRecordModal() {
+            const modal = document.getElementById('record-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function applyProductPreset() {
+            const prodId = document.getElementById('rec-product-preset').value;
+            if (!prodId) return;
+            const prod = state.data.products.find(p => p.id === prodId);
+            if (prod) {
+                document.getElementById('rec-product').value = prod.product;
+                document.getElementById('rec-price').value = prod.price;
+                updateModalSubtotal();
+            }
+        }
+
+        function updateModalSubtotal() {
+            const qty = Number(document.getElementById('rec-qty').value) || 0;
+            const price = Number(document.getElementById('rec-price').value) || 0;
+            document.getElementById('modal-subtotal').textContent = formatRM(qty * price);
+        }
+
+        function saveRecord(e) {
+            e.preventDefault();
+            const mod = state.activeModule;
+            const id = document.getElementById('rec-id').value;
+            const date = document.getElementById('rec-date').value;
+            const product = document.getElementById('rec-product').value.trim();
+            const category = document.getElementById('rec-category').value.trim();
+            const qty = Number(document.getElementById('rec-qty').value);
+            const price = Number(document.getElementById('rec-price').value);
+            const paymentRadio = document.querySelector('input[name="rec-payment"]:checked');
+            const payment = paymentRadio ? paymentRadio.value : 'Cash';
+
+            const payload = mod === 'products'
+                ? { id: id || 'id_' + Date.now(), date, product, category, qty, price }
+                : { id: id || 'id_' + Date.now(), date, product, qty, price, payment };
+
+            if (id) {
+                const idx = state.data[mod].findIndex(r => r.id === id);
+                if (idx !== -1) state.data[mod][idx] = payload;
+                showToast(state.lang === 'ms' ? 'Rekod berjaya dikemaskini!' : 'Record updated successfully!');
+            } else {
+                state.data[mod].unshift(payload);
+                showToast(state.lang === 'ms' ? 'Rekod baharu berjaya disimpan!' : 'New record saved successfully!');
+            }
+
+            persistData();
+            closeRecordModal();
+            renderCrudTable();
+        }
+
+        function openDeleteModal(id) {
+            state.deleteTarget = id;
+            const modal = document.getElementById('delete-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            state.deleteTarget = null;
+            const modal = document.getElementById('delete-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmDelete() {
+            if (!state.deleteTarget) return;
+            const mod = state.activeModule;
+            state.data[mod] = state.data[mod].filter(r => r.id !== state.deleteTarget);
+            persistData();
+            closeDeleteModal();
+            renderCrudTable();
+            showToast(state.lang === 'ms' ? 'Rekod telah dipadam.' : 'Record deleted.');
+        }
+
+        // --- 10. PROFIT & LOSS (UNTUNG & RUGI) STATEMENT ---
+        function clearPnLFilter() {
+            document.getElementById('pnl-start-date').value = '';
+            document.getElementById('pnl-end-date').value = '';
+            renderPnL();
+        }
+
+        function renderPnL() {
+            const start = document.getElementById('pnl-start-date').value;
+            const end = document.getElementById('pnl-end-date').value;
+
+            const filterByDate = arr => arr.filter(item => {
+                if (start && item.date < start) return false;
+                if (end && item.date > end) return false;
+                return true;
+            });
+
+            const salesList = filterByDate(state.data.sales);
+            const incomesList = filterByDate(state.data.incomes);
+            const purchasesList = filterByDate(state.data.purchases);
+            const expensesList = filterByDate(state.data.expenses);
+
+            const sum = arr => arr.reduce((a, b) => a + (Number(b.qty) * Number(b.price)), 0);
+
+            const salesVal = sum(salesList);
+            const incomesVal = sum(incomesList);
+            const totalRev = salesVal + incomesVal;
+            const purchasesVal = sum(purchasesList);
+            const grossProfit = totalRev - purchasesVal;
+            const expensesVal = sum(expensesList);
+            const netProfit = grossProfit - expensesVal;
+
+            // Company header details
+            document.getElementById('pnl-company-title').textContent = state.data.company.name || 'SMARTBIZ ENTERPRISE';
+            document.getElementById('pnl-company-ssm').textContent = state.data.company.ssm
+                ? `No. SSM: ${state.data.company.ssm}`
+                : (state.lang === 'ms' ? 'Perniagaan Belum Berdaftar SSM' : 'Unregistered Business');
+
+            document.getElementById('pnl-period-label').textContent = (start || end)
+                ? `${state.lang === 'ms' ? 'Tempoh' : 'Period'}: ${start || 'Awal'} → ${end || 'Kini'}`
+                : (state.lang === 'ms' ? 'Tempoh: Semua Rekod Kewangan' : 'Period: All Financial Records');
+
+            document.getElementById('pnl-val-sales').textContent = formatRM(salesVal);
+            document.getElementById('pnl-val-incomes').textContent = formatRM(incomesVal);
+            document.getElementById('pnl-val-total-rev').textContent = formatRM(totalRev);
+            document.getElementById('pnl-val-purchases').textContent = formatRM(purchasesVal);
+            document.getElementById('pnl-val-gross').textContent = formatRM(grossProfit);
+            document.getElementById('pnl-val-expenses').textContent = formatRM(expensesVal);
+            document.getElementById('pnl-val-net').textContent = formatRM(netProfit);
+
+            // Render Interactive Bar Chart on Profit & Loss Page
+            renderPnLBarChart(salesList, incomesList, purchasesList, expensesList, {
+                salesVal,
+                incomesVal,
+                purchasesVal,
+                expensesVal,
+                netProfit
+            });
+
+            // Payment Method Cards
+            const allIn = [...salesList, ...incomesList];
+            const cashIn = allIn.filter(x => x.payment === 'Cash').reduce((a, b) => a + (b.qty * b.price), 0);
+            const onlineIn = allIn.filter(x => ['Online Banking', 'E-Wallet', 'Card'].includes(x.payment)).reduce((a, b) => a + (b.qty * b.price), 0);
+            const otherIn = allIn.filter(x => x.payment === 'Other').reduce((a, b) => a + (b.qty * b.price), 0);
+
+            document.getElementById('pnl-payment-cards').innerHTML = `
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                    <p class="text-[11px] font-bold uppercase text-slate-500">Tunai (Cash)</p>
+                    <p class="text-base font-extrabold text-slate-900 mt-1">${formatRM(cashIn)}</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                    <p class="text-[11px] font-bold uppercase text-slate-500">Online / E-Wallet / Kad</p>
+                    <p class="text-base font-extrabold text-maroon-800 mt-1">${formatRM(onlineIn)}</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                    <p class="text-[11px] font-bold uppercase text-slate-500">Lain-lain (Other)</p>
+                    <p class="text-base font-extrabold text-slate-900 mt-1">${formatRM(otherIn)}</p>
+                </div>
+            `;
+        }
+
+        function renderPnLBarChart(salesList, incomesList, purchasesList, expensesList, totals) {
+            const canvas = document.getElementById('pnlBarChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (state.pnlChartInstance) state.pnlChartInstance.destroy();
+
+            // Detect distinct YYYY-MM months across all filtered records
+            const allFiltered = [...salesList, ...incomesList, ...purchasesList, ...expensesList];
+            const monthSet = new Set(allFiltered.map(x => (x.date || '').slice(0, 7)).filter(Boolean));
+            const months = Array.from(monthSet).sort();
+
+            const modeBadge = document.getElementById('pnl-chart-mode-label');
+
+            if (months.length > 1) {
+                // Multi-month grouped bar chart
+                if (modeBadge) {
+                    modeBadge.textContent = state.lang === 'ms'
+                        ? `Pecahan Bulanan (${months.length} Bulan)`
+                        : `Monthly Breakdown (${months.length} Months)`;
+                }
+
+                const monthLabels = months.map(ym => {
+                    const [y, m] = ym.split('-');
+                    const d = new Date(Number(y), Number(m) - 1, 1);
+                    return d.toLocaleDateString(state.lang === 'ms' ? 'ms-MY' : 'en-US', { month: 'short', year: 'numeric' });
+                });
+
+                const sumMonth = (arr, ym) => arr
+                    .filter(x => (x.date || '').startsWith(ym))
+                    .reduce((a, b) => a + (Number(b.qty) * Number(b.price)), 0);
+
+                const revData = months.map(ym => sumMonth(salesList, ym) + sumMonth(incomesList, ym));
+                const costData = months.map(ym => sumMonth(purchasesList, ym) + sumMonth(expensesList, ym));
+                const netData = months.map((_, idx) => revData[idx] - costData[idx]);
+
+                state.pnlChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: monthLabels,
+                        datasets: [
+                            {
+                                label: state.lang === 'ms' ? 'Jumlah Hasil' : 'Total Revenue',
+                                data: revData,
+                                backgroundColor: '#800020',
+                                borderRadius: 8
+                            },
+                            {
+                                label: state.lang === 'ms' ? 'Kos & Perbelanjaan' : 'Purchases & Expenses',
+                                data: costData,
+                                backgroundColor: '#b91c1c',
+                                borderRadius: 8
+                            },
+                            {
+                                label: state.lang === 'ms' ? 'Untung / Rugi Bersih' : 'Net Profit / Loss',
+                                data: netData,
+                                backgroundColor: '#10b981',
+                                borderRadius: 8
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, weight: '700' } }
+                            },
+                            tooltip: {
+                                backgroundColor: '#3b000d',
+                                padding: 10,
+                                cornerRadius: 10,
+                                callbacks: {
+                                    label: c => ` ${c.dataset.label}: ${formatRM(c.parsed.y)}`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    font: { size: 11, weight: '600' },
+                                    callback: val => 'RM ' + Number(val).toLocaleString('en-MY')
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 11, weight: '600' } }
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Category comparison bar chart (Revenue vs Costs vs Net Profit)
+                if (modeBadge) {
+                    modeBadge.textContent = state.lang === 'ms' ? 'Ringkasan Kategori' : 'Category Summary';
+                }
+
+                const labels = state.lang === 'ms'
+                    ? ['Jualan (Sales)', 'Pendapatan Lain', 'Kos Pembelian', 'Perbelanjaan', 'Untung / Rugi Bersih']
+                    : ['Sales Revenue', 'Other Incomes', 'Cost of Purchases', 'Operating Expenses', 'Net Profit / Loss'];
+
+                const values = [
+                    totals.salesVal,
+                    totals.incomesVal,
+                    totals.purchasesVal,
+                    totals.expensesVal,
+                    totals.netProfit
+                ];
+
+                state.pnlChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'RM',
+                            data: values,
+                            backgroundColor: [
+                                '#800020',
+                                '#f59e0b',
+                                '#475569',
+                                '#b91c1c',
+                                totals.netProfit >= 0 ? '#10b981' : '#dc2626'
+                            ],
+                            borderRadius: 10,
+                            maxBarThickness: 48
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#3b000d',
+                                padding: 10,
+                                cornerRadius: 10,
+                                callbacks: {
+                                    label: c => ' ' + formatRM(c.parsed.y)
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: Math.max(...values.map(v => Math.abs(v)), 100),
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    font: { size: 11, weight: '600' },
+                                    callback: val => 'RM ' + Number(val).toLocaleString('en-MY')
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 11, weight: '600' } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // --- 11. COMPANY INFORMATION (MAKLUMAT SYARIKAT) ---
+        function loadCompanyForm() {
+            const c = state.data.company;
+            document.getElementById('comp-name').value = c.name || '';
+            document.getElementById('comp-ssm').value = c.ssm || '';
+            document.getElementById('comp-type').value = c.type || 'Sole Proprietorship (Milikan Tunggal)';
+            document.getElementById('comp-category').value = c.category || '';
+            document.getElementById('comp-established').value = c.established || '';
+            document.getElementById('comp-email').value = c.email || '';
+            document.getElementById('comp-phone').value = c.phone || '';
+            document.getElementById('comp-address').value = c.address || '';
+            document.getElementById('comp-city').value = c.city || '';
+            document.getElementById('comp-state').value = c.state || 'Selangor';
+            document.getElementById('comp-postcode').value = c.postcode || '';
+            document.getElementById('comp-owner').value = c.owner || '';
+            document.getElementById('comp-size').value = c.size || 'Small';
+            document.getElementById('comp-currency').value = c.currency || 'Malaysian Ringgit (RM)';
+            document.getElementById('comp-fy-start').value = c.fyStart || '';
+            document.getElementById('comp-tax').value = c.tax || '';
+
+            const previewBox = document.getElementById('company-logo-preview-box');
+            if (c.logo) {
+                previewBox.innerHTML = `<img src="${c.logo}" alt="Logo" class="w-full h-full object-cover">`;
+            } else {
+                previewBox.innerHTML = `
+                    <svg class="w-12 h-10" viewBox="0 0 220 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M166 14H106C76 14 58 29 58 48C58 65 72 74 96 78L130 62C102 58 88 53 88 43C88 34 98 29 114 29H154L166 14Z" fill="#800020" />
+                        <path d="M96 78C124 83 136 89 136 100C136 111 122 118 98 118C84 118 71 116 60 113C74 123 94 128 116 128C149 128 168 112 168 91C168 73 153 64 130 62L96 78Z" fill="#540014" />
+                        <rect x="85" y="84" width="11" height="17" rx="2.5" fill="#800020" />
+                        <rect x="100" y="75" width="11" height="23" rx="2.5" fill="#800020" />
+                        <rect x="115" y="65" width="11" height="29" rx="2.5" fill="#800020" />
+                        <path d="M41 90C35 113 69 125 118 101C142 89 160 72 173 53L162 47L189 35L187 64L177 58C162 79 142 98 115 111C67 134 32 117 41 90Z" fill="#a81c40" />
+                    </svg>
+                `;
+            }
+        }
+
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                state.data.company.logo = evt.target.result;
+                document.getElementById('company-logo-preview-box').innerHTML = `<img src="${evt.target.result}" alt="Logo" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveCompanyInfo(e) {
+            e.preventDefault();
+            state.data.company = {
+                ...state.data.company,
+                name: document.getElementById('comp-name').value.trim(),
+                ssm: document.getElementById('comp-ssm').value.trim(),
+                type: document.getElementById('comp-type').value,
+                category: document.getElementById('comp-category').value.trim(),
+                established: document.getElementById('comp-established').value,
+                email: document.getElementById('comp-email').value.trim(),
+                phone: document.getElementById('comp-phone').value.trim(),
+                address: document.getElementById('comp-address').value.trim(),
+                city: document.getElementById('comp-city').value.trim(),
+                state: document.getElementById('comp-state').value,
+                postcode: document.getElementById('comp-postcode').value.trim(),
+                owner: document.getElementById('comp-owner').value.trim(),
+                size: document.getElementById('comp-size').value,
+                currency: 'Malaysian Ringgit (RM)',
+                fyStart: document.getElementById('comp-fy-start').value,
+                tax: document.getElementById('comp-tax').value.trim()
+            };
+            persistData();
+            updateTopbarTitle();
+            showToast(state.lang === 'ms' ? 'Maklumat syarikat berjaya disimpan!' : 'Company information saved!');
+        }
+
+        // --- 12. INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            setLanguage(state.lang);
+            if (state.currentUser) {
+                loadUserData(state.currentUser);
+                enterApp();
+            }
+        });
+    </script>
+</body>
+</html>
